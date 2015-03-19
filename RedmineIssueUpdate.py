@@ -4,10 +4,10 @@ from pprint import pprint
 
 #Config Goes Here
 #=====================
-USERNAME="ankur.kesharwani"
-PASSWORD="iam@nkurKesharwani001"
-REDMINE_URL="https://portal.optimusinfo.com/redmine"
-PROJECT_NAME = "teamfituiwork"
+USERNAME=""
+PASSWORD=""
+REDMINE_URL=""
+PROJECT_NAME = ""
 
 # Variable declarations goes here.
 input_issues = None
