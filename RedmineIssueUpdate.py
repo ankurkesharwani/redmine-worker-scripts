@@ -1,13 +1,12 @@
 from redmine import Redmine
 import json
 from pprint import pprint
+import getpass
 
 #Config Goes Here
 #=====================
-USERNAME=""
-PASSWORD=""
-REDMINE_URL=""
-PROJECT_NAME = ""
+REDMINE_URL="https://portal.optimusinfo.com/redmine"
+PROJECT_NAME = "teamfituiwork"
 
 # Variable declarations goes here.
 input_issues = None
@@ -18,7 +17,7 @@ sprint_issue_id = 50501
 #=================
 def listAllIssues(parentIssueId):
     issue = redmine.issue.get(parentIssueId, include='children')
-    print "->Redmine issues"
+    print "-->Redmine issues"
     for item in issue.children:
         print item.subject
     return issue.children
@@ -26,16 +25,15 @@ def listAllIssues(parentIssueId):
 def readInputFile(file_name):
     input_data = json_data=open(file_name).read()
     data = json.loads(json_data)
-    print "->Input issues"
+    print "-->Input issues"
     for item in data:
-        print item["subject"] + "-" + item["description"]
+        print item["subject"]
     return data
 
 def needsUpdate(redmine_issue, input_issue):
     needsUpdate=False
 
     keys = dict(redmine_issue).keys()
-
     if "tracker" in keys:
         if redmine_issue.tracker.id != input_issue["tracker_id"]:
             print "------>Tracker Id: " + str(redmine_issue.tracker.id) + " should update to " + str(input_issue["tracker_id"]) + "."
@@ -114,7 +112,7 @@ def createIssueList(redmine_issues, input_issues):
 
                 issue = redmine.issue.get(redmine_issue.id)
                 if needsUpdate(issue, input_issue)==True:
-                    print "---->Issue " + input_issue["subject"] + " needs update. Adding in issue list."
+                    print "-->Issue " + input_issue["subject"] + " needs update. Adding in issue list."
                     updated_issue=createUpdatedIssueWithData(input_issue, redmine_issue.id)
                     issue_list.append(updated_issue)
                 flag=1
@@ -129,29 +127,29 @@ def createIssueList(redmine_issues, input_issues):
             flag=0
     return issue_list
 
-def createDebugData():
-    issue = redmine_issues[0]
-    print "\n\n"
-    pprint(dir(issue))
-
-    redminissue=redmine.issue.get(50529)
-    print "\n\n"
-    pprint(dir(redminissue))
-
-    pprint(redminissue.assigned_to.id)
-
+def saveIssues(issues):
+        choice = raw_input('-->Your are about to save tickets on redmine. Do you wish to continue? ')
+        if(choice=="No"):
+            print "-->You choose to stop. Probably a good step!"
+            return
+        for issue in issues:
+            print "-->Saving ticket " + issue.subject
+            issue.save()
 
 # Script execution starts here.
 #================================
-print "->Logging in to" + PROJECT_NAME
+USERNAME = raw_input("-->Your redmine username: ")
+PASSWORD = getpass.getpass("-->Your redmine password: ")
+
+print "-->Logging in to" + PROJECT_NAME
 redmine = Redmine(REDMINE_URL, username=USERNAME, password=PASSWORD)
-print "->Successfully Logged in."
-print "->Loading projet " + PROJECT_NAME
+print "-->Successfully Logged in."
+print "-->Loading projet " + PROJECT_NAME
 project = redmine.project.get(PROJECT_NAME, include='trackers,issue_categories,enabled_modules')
-print "->Successfully Loaded " + PROJECT_NAME
+print "-->Successfully Loaded " + PROJECT_NAME
 
 redmine_issues = listAllIssues(sprint_issue_id)
-input_issues = readInputFile("./input_file")
+input_issues = readInputFile("./tickets_input_file")
 #createDebugData()
 new_issue_list = createIssueList(redmine_issues, input_issues)
-pprint(list(new_issue_list))
+saveIssues(new_issue_list)
