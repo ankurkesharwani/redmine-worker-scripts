@@ -4,13 +4,12 @@ import json
 from pprint import pprint
 import datetime
 import sys
+import getpass
 
 #Config Goes Here
 #=====================
-USERNAME=""
-PASSWORD=""
-REDMINE_URL=""
-PROJECT_NAME = ""
+REDMINE_URL="https://portal.optimusinfo.com/redmine"
+PROJECT_NAME = "teamfituiwork"
 
 # Variable declarations goes here.
 input_issues = None
@@ -64,10 +63,14 @@ def logTime(time_entries):
         print "-->You choose to stop. Probably a good step!"
         return
     for entry in time_entries:
+        print "-->Saving time entry for " + str(entry.issue_id)
         entry.save()
 
 # Script execution starts here.
 #================================
+USERNAME = raw_input("-->Your redmine username: ")
+PASSWORD = getpass.getpass("-->Your redmine password: ")
+
 print "->Logging in to" + PROJECT_NAME
 redmine = Redmine(REDMINE_URL, username=USERNAME, password=PASSWORD)
 print "->Successfully Logged in."
@@ -76,7 +79,7 @@ project = redmine.project.get(PROJECT_NAME, include='trackers,issue_categories,e
 print "->Successfully Loaded " + PROJECT_NAME
 
 redmine_issues = listAllIssues(sprint_issue_id)
-input_time_entries = readInputFile("./input_time")
+input_time_entries = readInputFile("./time_input_file")
 new_time_entries = createTimeEntries(redmine_issues,input_time_entries)
 
 logTime(new_time_entries)
